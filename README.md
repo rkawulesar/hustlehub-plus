@@ -1,4 +1,12 @@
+![React](https://img.shields.io/badge/React-125D40?style=for-the-badge&logo=react&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-22-162F2A?style=for-the-badge&logo=nodedotjs&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-125D40?style=for-the-badge&logo=mongodb&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-162F2A?style=for-the-badge&logo=docker&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-125D40?style=for-the-badge&logo=githubactions&logoColor=white)
+
 # HustleHub+
+
+## Overview
 
 A full-stack freelance marketplace built with React, Express and MongoDB. Clients browse and book services, freelancers manage gigs and view income, and administrators access a system overview. Developed as a group academic project and adapted for this portfolio.
 
@@ -6,12 +14,15 @@ Payments and tax estimates are simulated for demonstration.
 
 ## Features
 
-- Client and freelancer registration, JWT authentication, account lockout and token revocation on logout.
-- Gig creation, editing and deactivation with role and ownership checks.
-- Booking and transaction history, with server-derived prices, atomic database transactions and idempotent booking requests.
-- Freelancer income dashboard with annual and monthly totals and an educational tax estimate.
-- Structured application logging with optional Grafana Cloud Loki forwarding.
-- Automated backend, API and frontend checks, plus Docker Compose verification through GitHub Actions.
+| Area | Functionality |
+| --- | --- |
+| Client marketplace | Browse available services, book gigs and review personal booking and transaction history. |
+| Freelancer workspace | Create, edit and deactivate owned gigs, manage related bookings and view income. |
+| Financial dashboard | Annual and monthly income totals with an educational tax estimate. |
+| Administrator | Protected overview of users, active gigs, bookings and transactions. |
+| Authentication and access | JWT authentication, role and ownership checks, account lockout and logout token revocation. |
+| Monitoring | Structured logs with optional Grafana Cloud Loki forwarding. |
+| DevSecOps | Backend, API and frontend checks, static analysis and Docker Compose verification. |
 
 ## Technology stack
 
@@ -25,6 +36,24 @@ Payments and tax estimates are simulated for demonstration.
 | Tooling | Docker Compose, ESLint, GitHub Actions |
 
 ## Architecture
+
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"primaryColor":"#125D40","primaryTextColor":"#FFFFFF","primaryBorderColor":"#162F2A","lineColor":"#125D40","secondaryColor":"#EEF5F0","tertiaryColor":"#EEF5F0","textColor":"#162F2A","clusterBkg":"#EEF5F0","clusterBorder":"#125D40"}}}%%
+flowchart LR
+    Browser[React in browser] -->|HTTPS| API[Express API]
+    subgraph Compose[Docker Compose]
+        API -->|Frontend assets| Client[Nginx client]
+        API --> Access[Validation, JWT and ownership]
+        Access --> Business[Marketplace and finance]
+        Business --> Mongo[(MongoDB replica set)]
+    end
+    API --> Console[Console logs]
+    API -->|Optional HTTPS ingestion| Cloud[Grafana Cloud Loki]
+    classDef default fill:#125D40,stroke:#162F2A,color:#FFFFFF
+    classDef dark fill:#162F2A,stroke:#125D40,color:#FFFFFF
+    class API,Mongo,Cloud dark
+    style Compose fill:#EEF5F0,stroke:#125D40,color:#162F2A
+```
 
 The React client calls the Express API over HTTPS. Middleware validates requests, authentication and access before controllers interact with MongoDB. Booking and transaction creation use a database transaction and require a MongoDB replica set or Atlas.
 
@@ -42,8 +71,7 @@ These captures show the academic version with demonstration data.
 
 ![Freelancer workspace showing gigs, income and transaction records](docs/screenshots/income.jpg)
 
-<details>
-<summary>Booking, gig editing and administrator views</summary>
+### Booking, gig editing and administrator views
 
 ![Client booking and transaction history](docs/screenshots/bookings.jpg)
 
@@ -51,10 +79,8 @@ These captures show the academic version with demonstration data.
 
 ![Administrator overview showing aggregate totals](docs/screenshots/admin.jpg)
 
-</details>
 
-<details>
-<summary>Registration, sign-in and mobile views</summary>
+### Registration, sign-in and mobile views
 
 ![Registration form](docs/screenshots/registration.jpg)
 
@@ -64,7 +90,6 @@ These captures show the academic version with demonstration data.
 
 ![Gig editing on a narrow screen](docs/screenshots/gig-edit-mobile.jpg)
 
-</details>
 
 ## Setup and running
 
@@ -187,6 +212,25 @@ npm.cmd run test:stack
 ```
 
 This creates test records and restarts the local API to check persistence. Do not run it against production. Set `STACK_PORT` when using a non-default `APP_PORT`.
+
+## Continuous integration
+
+The [verification workflow](.github/workflows/part3.yml) installs dependencies, runs static analysis and security audits, executes tests, builds the application and verifies a temporary Docker Compose stack.
+
+```mermaid
+%%{init: {"theme":"base","themeVariables":{"primaryColor":"#125D40","primaryTextColor":"#FFFFFF","primaryBorderColor":"#162F2A","lineColor":"#125D40","textColor":"#162F2A"}}}%%
+flowchart LR
+    Change[Push or pull request] --> Install[Install dependencies]
+    Install --> Analysis[Lint and dependency audits]
+    Analysis --> Tests[Backend, API and frontend tests]
+    Tests --> Build[Build application]
+    Build --> Stack[Verify Compose stack]
+    Stack --> Reports[Upload reports]
+    Reports --> Cleanup[Stop temporary stack]
+    classDef default fill:#125D40,stroke:#162F2A,color:#FFFFFF
+    classDef dark fill:#162F2A,stroke:#125D40,color:#FFFFFF
+    class Analysis,Tests,Stack dark
+```
 
 ## Contributors
 
